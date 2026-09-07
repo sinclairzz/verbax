@@ -42,6 +42,19 @@ app = FastAPI(title='VERBA.X API',version='0.1.0',lifespan=lifespan,
     docs_url='/docs' if settings().environment != 'production' else None,redoc_url=None)
 
 
+@app.middleware('http')
+async def service_path_prefix(request: Request, call_next):
+    # Vercel Services forwards the original public path to the backend.
+    # Keep local routes unchanged while accepting the hosted /api/backend prefix.
+    prefix = '/api/backend'
+    path = request.scope.get('path', '')
+    if path == prefix or path.startswith(prefix + '/'):
+        stripped = path[len(prefix):] or '/'
+        request.scope['path'] = stripped
+        request.scope['raw_path'] = stripped.encode('ascii', 'ignore')
+    return await call_next(request)
+
+
 @app.exception_handler(RequestValidationError)
 async def validation_error(request, exc):
     # Never echo submitted passwords/CPF via Pydantic's input field.
