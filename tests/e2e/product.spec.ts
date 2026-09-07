@@ -75,8 +75,8 @@ test("simulação pública sem conta nem cartão", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "Agora você tem um ponto de partida." }),
   ).toBeVisible();
-  await expect(page.locator(".metric-card").nth(0)).toContainText("12.700,00");
-  await expect(page.locator(".metric-card").nth(2)).toContainText("4.200,00");
+  await expect(page.locator(".metric-card").nth(0)).toContainText("12.200,00");
+  await expect(page.locator(".metric-card").nth(2)).toContainText("3.700,00");
   await page.screenshot({
     path: "test-results/simulation-mobile.png",
     fullPage: true,
@@ -133,14 +133,14 @@ test("cadastro → caso real → persistência → limites do plano → exclusã
     await page.getByRole("button", { name: "Calcular e salvar" }).click();
     await expect(page).toHaveURL(/\/dashboard\/casos\/[a-f0-9-]+$/);
     await expect(page.locator(".metric-card").nth(0)).toContainText(
-      "12.700,00",
+      "12.200,00",
     );
     await expect(page.locator("body")).not.toContainText("52998224725");
     await expect(
       page.getByText("***.***.***-25", { exact: false }),
     ).toBeVisible();
     await page.reload();
-    await expect(page.locator(".metric-card").nth(2)).toContainText("4.200,00");
+    await expect(page.locator(".metric-card").nth(2)).toContainText("3.700,00");
     for (const [name, width, height] of [
       ["desktop", 1440, 1000],
       ["tablet", 834, 1112],

@@ -13,8 +13,8 @@ Money = Annotated[Decimal, Field(ge=0, le=Decimal('999999999.99'), max_digits=11
 VERSION = '0.1.0-ilustrativa'
 DISCLAIMER = 'Análise baseada nos dados fornecidos. Regras ilustrativas com fundamento a confirmar. Não substitui avaliação jurídica quando necessária.'
 RULES = {
-    'saldo_salario': ('Saldo de salário', '(salario_base / dias_no_mes) × dias_trabalhados', 'CLT, art. 64 (referência inicial; divisor e aplicabilidade a confirmar)', 'https://www.planalto.gov.br/ccivil_03/decreto-lei/del5452.htm'),
-    'aviso_previo': ('Aviso prévio indenizado', '(salario_base / 30) × (30 + min(anos_completos × 3, 60))', 'Lei 12.506/2011, art. 1º (a confirmar)', 'https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2011/lei/l12506.htm'),
+    'saldo_salario': ('Saldo de salário', '(salario_base / min(dias_no_mes, 30)) × dias_trabalhados', 'CLT, art. 64 (referência inicial; divisor e aplicabilidade a confirmar)', 'https://www.planalto.gov.br/ccivil_03/decreto-lei/del5452.htm'),
+    'aviso_previo': ('Aviso prévio indenizado', '(salario_base / 30) × (30 + min(max(anos_completos − 1, 0) × 3, 60))', 'Lei 12.506/2011, art. 1º (a confirmar)', 'https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2011/lei/l12506.htm'),
     'ferias': ('Férias proporcionais + 1/3', '(salario_base / 12 × meses_periodo) × 4/3', 'CLT, arts. 146 e 147; CF, art. 7º, XVII (a confirmar)', 'https://www.planalto.gov.br/ccivil_03/decreto-lei/del5452.htm'),
     'decimo_terceiro': ('13º salário proporcional', '(salario_base / 12) × meses_no_ano', 'Lei 4.090/1962, art. 1º (a confirmar)', 'https://www.planalto.gov.br/ccivil_03/leis/l4090.htm'),
     'fgts_multa': ('Multa de 40% do FGTS', 'total_fgts_depositado × 0,40', 'Lei 8.036/1990, art. 18, § 1º (a confirmar)', 'https://www.planalto.gov.br/ccivil_03/leis/l8036consol.htm'),
@@ -59,9 +59,11 @@ def calculate(data: CalculationInput, calculated_at: datetime | None = None) -> 
     with localcontext() as ctx:
         ctx.prec = 40
         salary = data.salario_base
+        daily_divisor = min(data.dias_no_mes, 30)
+        aviso_days = 30 + min(max(data.anos_completos - 1, 0) * 3, 60)
         values = [
-            salary / data.dias_no_mes * data.dias_trabalhados,
-            salary / 30 * (30 + min(data.anos_completos * 3, 60)),
+            salary / daily_divisor * data.dias_trabalhados,
+            salary / 30 * aviso_days,
             salary / 12 * data.meses_periodo * 4 / 3,
             salary / 12 * data.meses_no_ano,
             data.total_fgts_depositado * Decimal('0.40'),

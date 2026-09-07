@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -15,6 +17,8 @@ import { api } from "@/lib/api";
 import type { Calculation, CalculationInput, Case, RuleKey } from "@/lib/types";
 import { ErrorMessage, ScopeNote } from "./ui";
 import { Metrics, ResultPanels } from "./results";
+
+gsap.registerPlugin(useGSAP);
 
 const ruleLabels: [RuleKey, string][] = [
   ["saldo_salario", "Saldo de salário"],
@@ -54,11 +58,52 @@ export function CalculationForm({
   const [scope, setScope] = useState(false);
   const [result, setResult] = useState<Calculation | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const wizardRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const steps = authenticated
     ? ["Contrato", "Salário", "Direitos", "Comparação"]
     : ["Salário", "Direitos", "Comparação"];
   const stage = authenticated ? step : step + 1;
+
+  useGSAP(
+    () => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const root = wizardRef.current;
+      if (!root) return;
+      const visible = result
+        ? root.querySelectorAll(".simulation-results > *")
+        : root.querySelectorAll(
+            ".form-panel h2, .form-panel > p, .form-panel .alert, .form-panel .field, .form-panel .checkbox-label, .form-panel .scope-note, .form-actions",
+          );
+      if (visible.length)
+        gsap.fromTo(
+          visible,
+          { autoAlpha: 0, y: 14 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: result ? 0.55 : 0.42,
+            stagger: result ? 0.06 : 0.045,
+            ease: "power2.out",
+            clearProps: "opacity,transform,visibility",
+          },
+        );
+      const active = root.querySelector(".wizard-step.active");
+      if (active) {
+        gsap.fromTo(
+          active,
+          { opacity: 0.55 },
+          { opacity: 1, duration: 0.35, ease: "power2.out" },
+        );
+        gsap.fromTo(
+          active.querySelector(":scope > span:first-child"),
+          { scale: 0.78 },
+          { scale: 1, duration: 0.45, ease: "back.out(2)" },
+        );
+      }
+    },
+    { scope: wizardRef, dependencies: [stage, result] },
+  );
   useEffect(() => {
     if (!authenticated) return;
     try {
@@ -242,7 +287,7 @@ export function CalculationForm({
   }
   if (result)
     return (
-      <div className="simulation-results">
+      <div ref={wizardRef} className="simulation-results">
         <div>
           <p className="eyebrow">SUA SIMULAÇÃO ESTÁ PRONTA</p>
           <h2 id="simulation-heading" tabIndex={-1}>
@@ -276,7 +321,7 @@ export function CalculationForm({
       </div>
     );
   return (
-    <div className="wizard-layout">
+      <div ref={wizardRef} className="wizard-layout">
       <div>
         <div
           className="wizard-progress"
