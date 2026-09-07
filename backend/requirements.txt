@@ -1,0 +1,15 @@
+fastapi>=0.115,<1
+uvicorn[standard]>=0.34,<1
+sqlalchemy>=2.0.38,<3
+psycopg[binary]>=3.2,<4
+alembic>=1.15,<2
+pydantic-settings>=2.8,<3
+email-validator>=2.2,<3
+argon2-cffi>=23.1,<26
+cryptography>=44,<49
+reportlab>=4.3,<5
+stripe>=12,<15
+httpx>=0.28,<1
+pytest>=8.3,<10
+pypdf>=5,<7
+python-dotenv>=1,<2
