@@ -135,7 +135,12 @@ export function BillingPanel() {
                 <h2>Pagamentos e reembolsos</h2>
                 <CreditCard size={17} />
               </div>
-              <div className="table-scroll" tabIndex={0} role="region" aria-label="Tabela de pagamentos e reembolsos">
+              <div
+                className="table-scroll"
+                tabIndex={0}
+                role="region"
+                aria-label="Tabela de pagamentos e reembolsos"
+              >
                 <table className="data-table">
                   <thead>
                     <tr>
@@ -209,7 +214,7 @@ export function BillingPanel() {
                 <p className="muted">Preços e condições, sempre por inteiro.</p>
               </div>
             </div>
-            <Plans />
+            <Plans context="account" />
           </section>
         </div>
       )}

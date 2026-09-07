@@ -19,6 +19,7 @@ import { Header, Footer } from "@/components/public-shell";
 import { ProductPreview } from "@/components/product-preview";
 import { Plans } from "@/components/plans";
 import { LandingMotion } from "@/components/landing-motion";
+import { contact, freeConsultationUrl } from "@/lib/contact";
 
 const steps = [
   {
@@ -52,16 +53,12 @@ const questions = [
     "Nunca. Todos os valores monetários são calculados por um motor determinístico em código. A camada de IA especializada foi planejada para organizar documentos e explicar contexto; ela está em breve nesta versão.",
   ],
   [
-    "Preciso pagar ou criar conta para simular?",
-    "Não. A simulação básica é gratuita e pode ser feita sem conta e sem cartão. Para salvar um caso, crie sua conta. A memória detalhada e o PDF são liberados nos planos pagos.",
+    "Como funciona a consulta gratuita?",
+    "O plano Free inclui uma consulta inicial gratuita. Clique em “Falar com o Cícero” para abrir o WhatsApp com a mensagem pronta e combinar o atendimento. Não é necessário informar cartão.",
   ],
   [
     "Quais rescisões posso conferir agora?",
     "Esta versão cobre demissão sem justa causa com aviso prévio indenizado, usando cinco fórmulas básicas. INSS, IRRF, férias vencidas, convenções coletivas, horas extras e outros adicionais ainda não entram no cálculo. Compare valores brutos das mesmas verbas.",
-  ],
-  [
-    "Como funciona o plano de R$ 27,90?",
-    "É uma assinatura mensal de R$ 27,90 no cartão de crédito, com cobrança recorrente até cancelamento. Você pode cancelar a renovação no painel. Na primeira contratação, pode desistir em até 7 dias corridos e solicitar reembolso integral.",
   ],
   [
     "Como meus dados são protegidos?",
@@ -81,8 +78,7 @@ export default function Home() {
               <span className="status-light" /> AUDITORIA TRABALHISTA, ÀS CLARAS
             </span>
             <h1>
-              <span className="hero-title-line">Como saber se</span>{" "}
-              <br />
+              <span className="hero-title-line">Como saber se</span> <br />
               <span className="hero-title-line">sua rescisão foi</span>
               <br />
               <em className="hero-title-line">paga certo?</em>
@@ -109,7 +105,9 @@ export default function Home() {
               cartão de crédito
             </p>
           </div>
-          <div className="hero-visual"><ProductPreview /></div>
+          <div className="hero-visual">
+            <ProductPreview />
+          </div>
         </section>
         <div className="trust-strip container">
           <span>
@@ -140,7 +138,9 @@ export default function Home() {
               Uma pergunta de cada vez.
             </p>
           </div>
-          <div className="steps-rail" aria-hidden="true"><span /></div>
+          <div className="steps-rail" aria-hidden="true">
+            <span />
+          </div>
           <div className="steps-grid">
             {steps.map(({ icon: Icon, title, text }, index) => (
               <article key={title} className="step-card">
@@ -268,15 +268,47 @@ export default function Home() {
           </div>
           <Plans />
           <p className="pricing-footnote">
-            <LockKeyhole size={14} /> Preço e recorrência sempre visíveis antes
-            de confirmar.{" "}
+            <LockKeyhole size={14} /> Preço e condições sempre visíveis antes de
+            confirmar.{" "}
             <Link href="/cancelamento">Conheça a política de reembolso.</Link>
           </p>
         </section>
-        <section className="container social-placeholder">
-          <span className="eyebrow">TRANSPARÊNCIA DESDE O PRIMEIRO DIA</span>
-          <p>[depoimento real — inserir após os primeiros casos]</p>
-          <span>A confiança será construída com experiências reais.</span>
+        <section
+          className="container section founder-section"
+          aria-labelledby="founder-title"
+        >
+          <div className="founder-photo">
+            <Image
+              src="/about/cicero-neto.png"
+              alt="Retrato de Cícero Neto, fundador da VERBA.X"
+              width={1255}
+              height={1673}
+              sizes="(max-width: 800px) 100vw, 380px"
+              unoptimized
+            />
+          </div>
+          <div className="founder-copy">
+            <p className="eyebrow">QUEM ESTÁ POR TRÁS DA VERBA.X</p>
+            <h2 id="founder-title">{contact.founder}</h2>
+            <p className="founder-role">Fundador</p>
+            <p>
+              Contato direto para a consulta gratuita do plano Free e para
+              orientar você sobre o próximo passo da sua análise.
+            </p>
+            <div className="founder-actions">
+              <Link
+                href={freeConsultationUrl}
+                className="button primary"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Falar com o Cícero <ArrowUpRight size={17} />
+              </Link>
+              <a className="text-link" href={`mailto:${contact.email}`}>
+                {contact.email}
+              </a>
+            </div>
+          </div>
         </section>
         <section className="container section faq-section">
           <div>

@@ -12,13 +12,14 @@ from .config import settings
 from .db import (SessionLocal, get_db, now, Organizacao, Usuario, Empregado, Empregador, Caso, RegistroSalarial,
     PeriodoAquisitivo, ResultadoCalculo, Divergencia, RegraVersionada, Assinatura, Pagamento, Sessao,
     ResetSenha, WebhookEvent, Solicitation)
-from .schemas import Register, Login, Forgot, Reset, NewCase, Checkout, Support
+from .schemas import Register, Login, GoogleLogin, Forgot, Reset, NewCase, Checkout, Support
 from .engine import RULES, VERSION, CalculationInput, calculate, validate_dates
 from .security import (current_user, require_csrf, create_session, hasher, verify_password, DUMMY_HASH,
     digest, lookup, audit, masked_cpf, rate_limit, COOKIE)
 from .mail import send_reset
 from .report import build_pdf
 from . import billing
+from .supabase_auth import verify_google_access_token
 
 logger = logging.getLogger('verba')
 
@@ -141,6 +142,47 @@ def login(data: Login,request: Request,response: Response,db: Session = Depends(
     create_session(db,user,response)
     audit(db,user,'login.sucesso')
     db.commit()
+    return user_json(db,user)
+
+
+@app.post('/auth/google',dependencies=[Depends(require_csrf)])
+async def google_login(data: GoogleLogin,request: Request,response: Response,db: Session = Depends(get_db)):
+    rate_limit(db,request,'google-login',20)
+    try:
+        identity = await verify_google_access_token(data.access_token)
+    except RuntimeError as exc:
+        raise HTTPException(503,str(exc))
+    except ValueError as exc:
+        audit(db,None,'login.google_falhou')
+        db.commit()
+        raise HTTPException(401,str(exc))
+
+    user = db.scalar(select(Usuario).where(Usuario.email_hash == lookup(identity.email)))
+    created = user is None
+    if created:
+        org = Organizacao(nome=identity.name)
+        db.add(org)
+        db.flush()
+        # Google users do not receive a reusable local password. Password recovery can
+        # still establish one later after ownership of the email is confirmed.
+        user = Usuario(
+            organizacao_id=org.id,
+            nome=identity.name,
+            email=identity.email,
+            email_hash=lookup(identity.email),
+            senha_hash=hasher.hash(secrets.token_urlsafe(48)),
+        )
+        db.add(user)
+        db.flush()
+        db.add(Assinatura(organizacao_id=org.id,usuario_id=user.id))
+
+    create_session(db,user,response)
+    audit(db,user,'conta.google_criada' if created else 'login.google_sucesso')
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409,'Não foi possível concluir o acesso com Google. Tente novamente.')
     return user_json(db,user)
 
 

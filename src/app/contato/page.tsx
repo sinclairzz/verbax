@@ -2,6 +2,7 @@ import Link from "next/link";
 import { LegalShell, OperatorNotice } from "@/components/legal";
 import { getUser } from "@/lib/server";
 import { SupportForm } from "@/components/settings-panel";
+import { contact, freeConsultationUrl } from "@/lib/contact";
 export const metadata = {
   title: "Contato e suporte",
   description:
@@ -17,6 +18,20 @@ export default async function Page() {
         formulário.
       </p>
       <OperatorNotice />
+      <h2>Consulta gratuita</h2>
+      <p>
+        Para solicitar a consulta do plano Free, fale diretamente com Cícero
+        Neto. A conversa será aberta com uma mensagem pronta; não envie senha,
+        dados de cartão ou documentos sensíveis pelo WhatsApp.
+      </p>
+      <a
+        href={freeConsultationUrl}
+        className="button secondary"
+        target="_blank"
+        rel="noreferrer"
+      >
+        Abrir WhatsApp de {contact.founder}
+      </a>
       {user ? (
         <SupportForm />
       ) : (

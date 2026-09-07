@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     app_url: str = 'http://localhost:3000'
     encryption_key: str = ''
     lookup_secret: str = ''
+    supabase_url: str = ''
+    supabase_publishable_key: str = Field(default='', repr=False)
     stripe_secret_key: str = ''
     stripe_webhook_secret: str = ''
     payments_live_enabled: bool = False

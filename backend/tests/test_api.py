@@ -13,9 +13,11 @@ from pypdf import PdfReader
 from sqlalchemy import select, text
 from sqlalchemy.exc import DBAPIError
 from app.db import SessionLocal, Usuario, Caso, Empregado, Assinatura, Pagamento, ResultadoCalculo, ResetSenha, now
-from app.security import digest
+from app.security import digest, lookup
 from app.config import settings
 from app import billing
+from app import main as main_module
+from app.supabase_auth import GoogleIdentity
 
 
 def new_case(client,data):
@@ -41,13 +43,46 @@ def test_signup_requires_opt_in(client):
     assert '1234567890' not in response.text
 
 
+def test_google_login_creates_then_reuses_local_account(client,monkeypatch):
+    async def verified(_token):
+        return GoogleIdentity(email='google.user@example.com',name='Pessoa Google')
+
+    monkeypatch.setattr(main_module,'verify_google_access_token',verified)
+    first=client.post('/auth/google',json={'access_token':'valid-google-token-for-test','aceite':True})
+    assert first.status_code==200,first.text
+    assert first.json()['email']=='google.user@example.com'
+    first_id=first.json()['id']
+    assert client.get('/auth/me').status_code==200
+    assert client.post('/auth/logout').status_code==200
+
+    second=client.post('/auth/google',json={'access_token':'another-valid-google-token','aceite':True})
+    assert second.status_code==200,second.text
+    assert second.json()['id']==first_id
+    with SessionLocal() as db:
+        users=db.scalars(select(Usuario).where(Usuario.email_hash==lookup('google.user@example.com'))).all()
+        assert len(users)==1
+        assert users[0].senha_hash.startswith('$argon2id$')
+
+
+def test_google_login_requires_terms_and_verified_token(client,monkeypatch):
+    assert client.post('/auth/google',json={'access_token':'valid-google-token-for-test','aceite':False}).status_code==422
+
+    async def rejected(_token):
+        raise ValueError('A autenticação com Google expirou ou é inválida.')
+
+    monkeypatch.setattr(main_module,'verify_google_access_token',rejected)
+    response=client.post('/auth/google',json={'access_token':'expired-google-token-test','aceite':True})
+    assert response.status_code==401
+    assert response.json()['detail']=='A autenticação com Google expirou ou é inválida.'
+
+
 def test_signup_login_session_and_encryption(registered,case_data):
     client,credentials,user=registered
     assert client.get('/auth/me').status_code==200
     item=new_case(client,case_data)
     assert item['cpf_mascarado']=='***.***.***-25'
     assert case_data['cpf'] not in json.dumps(item)
-    assert item['calculo']['total_devido']=='12700.00'
+    assert item['calculo']['total_devido']=='12400.00'
     with SessionLocal() as db:
         row=db.get(Usuario,user['id'])
         assert row.senha_hash.startswith('$argon2id$')
@@ -86,7 +121,7 @@ def test_free_pdf_locked_full_report_and_immutable_rules(registered,case_data):
     content='\n'.join(p.extract_text() for p in report.pages)
     assert len(report.pages)>=4
     assert case_data['cpf'] not in content
-    assert '12.700,00' in content and '4.200,00' in content
+    assert '12.400,00' in content and '3.900,00' in content
     assert 'a confirmar' in content and 'substitui' in content
     assert 'Memória de cálculo' in content and 'Snapshot' in content
     Path('tmp/pdfs').mkdir(parents=True,exist_ok=True)

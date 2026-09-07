@@ -1,5 +1,7 @@
 import { Header, Footer } from "@/components/public-shell";
 import { Checkout } from "@/components/checkout";
+import { getUser } from "@/lib/server";
+import { redirect } from "next/navigation";
 export const metadata = {
   title: "Escolha seu plano",
   description:
@@ -12,6 +14,7 @@ export default async function Page({
   searchParams: Promise<{ plano?: string; caso?: string; cancelado?: string }>;
 }) {
   const params = await searchParams;
+  if (params.plano === "recorrente" && !(await getUser())) redirect("/login");
   return (
     <>
       <Header />

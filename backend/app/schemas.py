@@ -25,6 +25,11 @@ class Login(BaseModel):
     senha: str = Field(min_length=1, max_length=128)
 
 
+class GoogleLogin(BaseModel):
+    access_token: str = Field(min_length=20, max_length=4096)
+    aceite: Literal[True]
+
+
 class Forgot(BaseModel):
     email: EmailStr
 

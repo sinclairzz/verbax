@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Header, Footer } from "./public-shell";
 import { ScopeNote } from "./ui";
+import { contact } from "@/lib/contact";
 
 export function LegalShell({
   title,
@@ -28,10 +29,12 @@ export function LegalShell({
 export function OperatorNotice() {
   return (
     <p>
-      A identificação empresarial e o canal público do responsável serão
-      informados antes da abertura comercial. Este ambiente está em
-      desenvolvimento e não está habilitado para cobranças reais. Usuários
-      cadastrados podem registrar solicitações em{" "}
+      O atendimento é conduzido por {contact.founder}, fundador da VERBA.X, pelo
+      e-mail <a href={`mailto:${contact.email}`}>{contact.email}</a>. Endereço
+      de atendimento: {contact.addressLine}, CEP {contact.postalCode}. A
+      identificação empresarial completa será publicada antes da abertura
+      comercial. Este ambiente está em desenvolvimento e não está habilitado
+      para cobranças reais. Usuários cadastrados podem registrar solicitações em{" "}
       <Link href="/dashboard/configuracoes">
         Configurações → Suporte e privacidade
       </Link>

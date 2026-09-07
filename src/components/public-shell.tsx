@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Arrow, Logo } from "./ui";
+import { contact } from "@/lib/contact";
 
 export function Header() {
   return (
@@ -38,6 +39,13 @@ export function Footer() {
               Confiança para decidir.
             </p>
           </div>
+          <address className="footer-contact">
+            <strong>Contato</strong>
+            <span>{contact.founder} · Fundador</span>
+            <a href={`mailto:${contact.email}`}>{contact.email}</a>
+            <span>{contact.addressLine}</span>
+            <span>CEP {contact.postalCode}</span>
+          </address>
           <Link href="/simular" className="button secondary">
             Simular gratuitamente <Arrow />
           </Link>

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 const allowed =
-  /^(health|config|auth\/(csrf|register|login|logout|me|forgot-password|reset-password)|simulate|cases(?:\/[a-f0-9-]+(?:\/pdf)?)?|billing(?:\/(checkout|sync|cancel|webhook|refund\/[a-f0-9-]+))?|support|account)$/;
+  /^(health|config|auth\/(csrf|register|login|google|logout|me|forgot-password|reset-password)|simulate|cases(?:\/[a-f0-9-]+(?:\/pdf)?)?|billing(?:\/(checkout|sync|cancel|webhook|refund\/[a-f0-9-]+))?|support|account)$/;
 
 async function proxy(
   request: NextRequest,
