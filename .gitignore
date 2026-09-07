@@ -3,6 +3,7 @@ node_modules/
 .venv/
 .data/
 .npm-cache/
+backend/.npm-cache/
 .pytest_cache/
 __pycache__/
 *.pyc

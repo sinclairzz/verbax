@@ -223,6 +223,7 @@ export default function Home() {
               alt="Referência visual fornecida para a VERBA.X, com painel escuro, comparador e gráfico de distribuição. Valores ilustrativos."
               width={1254}
               height={1254}
+              sizes="(max-width: 980px) 100vw, 50vw"
             />
             <div className="reference-caption">
               Referência visual do produto · valores ilustrativos da imagem
