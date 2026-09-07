@@ -224,6 +224,7 @@ export default function Home() {
               width={1254}
               height={1254}
               sizes="(max-width: 980px) 100vw, 50vw"
+              unoptimized
             />
             <div className="reference-caption">
               Referência visual do produto · valores ilustrativos da imagem
