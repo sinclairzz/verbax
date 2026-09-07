@@ -1,12 +1,14 @@
 from functools import lru_cache
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import model_validator
+from pydantic import Field, field_validator, model_validator
+from .database import normalize_database_url, transaction_pooler
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file='.env', extra='ignore')
+    model_config = SettingsConfigDict(env_file='.env', extra='ignore', hide_input_in_errors=True)
     environment: str = 'development'
-    database_url: str = 'postgresql+psycopg://verba:verba-local-only@127.0.0.1:55432/verba'
+    database_url: str = Field(default='postgresql+psycopg://verba:verba-local-only@127.0.0.1:55432/verba', repr=False)
+    database_migration_url: str = Field(default='', repr=False)
     app_url: str = 'http://localhost:3000'
     encryption_key: str = ''
     lookup_secret: str = ''
@@ -24,6 +26,20 @@ class Settings(BaseSettings):
     operator_document: str = ''
     legal_review_approved: bool = False
 
+    @field_validator('database_url', 'database_migration_url')
+    @classmethod
+    def validate_database_url(cls, value, info):
+        if not value and info.field_name == 'database_migration_url':
+            return ''
+        return normalize_database_url(value)
+
+    @property
+    def migration_url(self):
+        value = self.database_migration_url or self.database_url
+        if transaction_pooler(value):
+            raise ValueError('Migrações requerem DATABASE_MIGRATION_URL com conexão direta ou Session pooler (5432).')
+        return value
+
     @model_validator(mode='after')
     def validate_deployment(self):
         if self.environment not in ('development', 'test', 'production'):
@@ -35,7 +51,9 @@ class Settings(BaseSettings):
         if self.environment == 'production':
             if not self.app_url.startswith('https://'):
                 raise ValueError('HTTPS obrigatório em produção')
-            if not self.database_url.startswith('postgresql') or 'sslmode=' not in self.database_url:
+            from sqlalchemy.engine import make_url
+            if any(make_url(url).query.get('sslmode') not in ('require', 'verify-ca', 'verify-full')
+                   for url in (self.database_url, self.migration_url)):
                 raise ValueError('PostgreSQL com TLS obrigatório em produção')
             if not all([self.smtp_host, self.email_from, self.support_email, self.operator_name, self.operator_document, self.legal_review_approved]):
                 raise ValueError('Produção requer SMTP, contato, identificação do operador e revisão jurídica aprovada')

@@ -2,10 +2,11 @@ import json
 import uuid
 from datetime import datetime, timezone
 from cryptography.fernet import Fernet
-from sqlalchemy import create_engine, String, Text, DateTime, ForeignKey, UniqueConstraint, ForeignKeyConstraint, CheckConstraint, Integer, Boolean
+from sqlalchemy import String, Text, DateTime, ForeignKey, UniqueConstraint, ForeignKeyConstraint, CheckConstraint, Integer, Boolean
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 from sqlalchemy.types import TypeDecorator
 from .config import settings
+from .database import database_engine
 
 
 def now():
@@ -231,7 +232,7 @@ class Solicitation(TenantEntity, Base):
     status: Mapped[str] = mapped_column(String(30), default='recebida')
 
 
-engine = create_engine(settings().database_url, pool_pre_ping=True, echo=False)
+engine = database_engine(settings().database_url)
 SessionLocal = sessionmaker(engine, expire_on_commit=False)
 
 

@@ -18,6 +18,7 @@ import {
 import { Header, Footer } from "@/components/public-shell";
 import { ProductPreview } from "@/components/product-preview";
 import { Plans } from "@/components/plans";
+import { LandingMotion } from "@/components/landing-motion";
 
 const steps = [
   {
@@ -70,20 +71,21 @@ const questions = [
 
 export default function Home() {
   return (
-    <>
+    <LandingMotion>
       <Header />
       <main id="conteudo">
         <section className="hero container">
+          <div className="landing-glow" aria-hidden="true" />
           <div className="hero-copy">
             <span className="hero-kicker">
               <span className="status-light" /> AUDITORIA TRABALHISTA, ÀS CLARAS
             </span>
             <h1>
-              Como saber se
+              <span className="hero-title-line">Como saber se</span>{" "}
               <br />
-              sua rescisão foi
+              <span className="hero-title-line">sua rescisão foi</span>
               <br />
-              <em>paga certo?</em>
+              <em className="hero-title-line">paga certo?</em>
             </h1>
             <p className="hero-description">
               Seu trabalho tem valor. Entenda cada verba, confira o que recebeu
@@ -107,7 +109,7 @@ export default function Home() {
               cartão de crédito
             </p>
           </div>
-          <ProductPreview />
+          <div className="hero-visual"><ProductPreview /></div>
         </section>
         <div className="trust-strip container">
           <span>
@@ -138,6 +140,7 @@ export default function Home() {
               Uma pergunta de cada vez.
             </p>
           </div>
+          <div className="steps-rail" aria-hidden="true"><span /></div>
           <div className="steps-grid">
             {steps.map(({ icon: Icon, title, text }, index) => (
               <article key={title} className="step-card">
@@ -315,6 +318,6 @@ export default function Home() {
         </div>
       </main>
       <Footer />
-    </>
+    </LandingMotion>
   );
 }
