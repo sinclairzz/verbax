@@ -10,7 +10,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, Field, model_validator
 
 Money = Annotated[Decimal, Field(ge=0, le=Decimal('999999999.99'), max_digits=11, decimal_places=2)]
-VERSION = '0.1.0-ilustrativa'
+VERSION = '0.2.0-ilustrativa'
 DISCLAIMER = 'Análise baseada nos dados fornecidos. Regras ilustrativas com fundamento a confirmar. Não substitui avaliação jurídica quando necessária.'
 RULES = {
     'saldo_salario': ('Saldo de salário', '(salario_base / min(dias_no_mes, 30)) × dias_trabalhados', 'CLT, art. 64 (referência inicial; divisor e aplicabilidade a confirmar)', 'https://www.planalto.gov.br/ccivil_03/decreto-lei/del5452.htm'),
